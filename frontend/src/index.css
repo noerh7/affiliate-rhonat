@@ -1,8 +1,193 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #0f172a;
+  --bg-soft: #0b1224;
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  --card-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
-  @apply bg-gray-100 text-gray-900;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #0f172a;
+  background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(167, 139, 250, 0.08), transparent 26%),
+    radial-gradient(circle at 50% 70%, rgba(52, 211, 153, 0.06), transparent 30%),
+    var(--bg-soft);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  /* Reserve the scrollbar gutter to avoid horizontal layout shifts when the page height changes */
+  overflow-y: scroll;
+  scrollbar-gutter: stable both-edges;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-background {
+  min-height: 100vh;
+  padding: 32px;
+  background: transparent;
+}
+
+.page-surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #ffffff);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #cbd5e1;
+  box-shadow: 0 14px 50px rgba(15, 23, 42, 0.12);
+}
+
+.nav-blur {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.sidebar {
+  width: 260px;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 32px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  padding: 22px 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 36px rgba(15, 23, 42, 0.08);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.14));
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #0f172a;
+  font-weight: 500;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.nav-item svg {
+  color: #94a3b8;
+}
+
+.nav-item:hover {
+  background: rgba(37, 99, 235, 0.08);
+  transform: translateX(2px);
+}
+
+.nav-item.active {
+  background: linear-gradient(120deg, rgba(37, 99, 235, 0.18), rgba(16, 185, 129, 0.18));
+  color: #0b1224;
+}
+
+.nav-item.active svg {
+  color: #0b1224;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  background: linear-gradient(120deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 36px rgba(37, 99, 235, 0.34);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #0f172a;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.03);
+  border-color: #cbd5e1;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1e3a8a;
+  font-weight: 600;
+  font-size: 12px;
 }

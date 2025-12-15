@@ -1,11 +1,21 @@
 
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import AffiliateDashboard from './pages/AffiliateDashboard';
+import BrandDashboard from './pages/BrandDashboard';
 import Links from './pages/Links';
+import LinkDetails from './pages/LinkDetails';
 import Products from './pages/Products';
-import ClickBank from './pages/ClickBank';
+import Marketplace from './pages/Marketplace';
+import ProductDetails from './pages/ProductDetails';
+import TopAffiliates from './pages/TopAffiliates';
+import Approvals from './pages/Approvals';
+import Payouts from './pages/Payouts';
+import Clickbank from './pages/Clickbank';
+import JVZoo from './pages/JVZoo';
+import TestSale from './pages/TestSale';
+import AdminReports from './pages/AdminReports';
 import { useAuth } from './hooks/useAuth';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
@@ -29,10 +39,34 @@ export default function App() {
           }
         />
         <Route
+          path="/affiliate"
+          element={
+            <PrivateRoute>
+              <AffiliateDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/brand"
+          element={
+            <PrivateRoute>
+              <BrandDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/links"
           element={
             <PrivateRoute>
               <Links />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/links/:id"
+          element={
+            <PrivateRoute>
+              <LinkDetails />
             </PrivateRoute>
           }
         />
@@ -45,10 +79,74 @@ export default function App() {
           }
         />
         <Route
+          path="/marketplace"
+          element={
+            <PrivateRoute>
+              <Marketplace />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/products/:id"
+          element={
+            <PrivateRoute>
+              <ProductDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/top-affiliates"
+          element={
+            <PrivateRoute>
+              <TopAffiliates />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/approvals"
+          element={
+            <PrivateRoute>
+              <Approvals />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payouts"
+          element={
+            <PrivateRoute>
+              <Payouts />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/clickbank"
           element={
             <PrivateRoute>
-              <ClickBank />
+              <Clickbank />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/jvzoo"
+          element={
+            <PrivateRoute>
+              <JVZoo />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/test-sale"
+          element={
+            <PrivateRoute>
+              <TestSale />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin-reports"
+          element={
+            <PrivateRoute>
+              <AdminReports />
             </PrivateRoute>
           }
         />
