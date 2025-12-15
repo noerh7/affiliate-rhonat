@@ -32,7 +32,7 @@ Créez un fichier `.env.local` dans le dossier `frontend` :
 
 ```bash
 VITE_SUPABASE_URL=https://etkeimmyqfangzyrajqx.supabase.co
-VITE_SUPABASE_ANON_KEY=votre-anon-key-ici
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0a2VpbW15cWZhbmd6eXJhanF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2MDgxNjksImV4cCI6MjA4MDE4NDE2OX0.TF4TBcnrbNVLdZSQEnrOE6xCSE1KGHd4WGX-1rGoBdc
 ```
 
 ### Étape 4 : Configurer l'authentification
