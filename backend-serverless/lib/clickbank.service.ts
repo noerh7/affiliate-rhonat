@@ -31,7 +31,9 @@ class ClickBankService {
         this.axiosInstance.interceptors.request.use(
             (config) => {
                 const authHeaders = this.generateAuthHeaders();
-                config.headers = { ...config.headers, ...authHeaders };
+                Object.entries(authHeaders).forEach(([key, value]) => {
+                    config.headers.set(key, value);
+                });
                 return config;
             },
             (error) => {
