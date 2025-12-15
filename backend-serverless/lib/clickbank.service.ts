@@ -15,9 +15,8 @@ class ClickBankService {
         this.devKey = process.env.CLICKBANK_DEV_KEY || '';
         this.apiKey = process.env.CLICKBANK_API_KEY || '';
 
-        if (!this.devKey || !this.apiKey) {
-            throw new Error('ClickBank credentials not configured');
-        }
+        // Ne pas lancer d'erreur ici pour éviter de crasher la fonction serverless
+        // Les erreurs seront gérées dans chaque méthode
 
         this.axiosInstance = axios.create({
             baseURL: process.env.CLICKBANK_BASE_URL || 'https://api.clickbank.com',
@@ -40,6 +39,17 @@ class ClickBankService {
                 return Promise.reject(error);
             }
         );
+    }
+
+    private checkCredentials(): ClickBankError | null {
+        if (!this.devKey || !this.apiKey) {
+            return {
+                error: 'Configuration Error',
+                message: 'ClickBank credentials (CLICKBANK_DEV_KEY and CLICKBANK_API_KEY) are not configured. Please set them in your Vercel environment variables.',
+                statusCode: 500,
+            };
+        }
+        return null;
     }
 
     private generateAuthHeaders(): Record<string, string> {
@@ -72,6 +82,9 @@ class ClickBankService {
         startDate?: string,
         endDate?: string
     ): Promise<ClickBankOrder[] | ClickBankError> {
+        const credError = this.checkCredentials();
+        if (credError) return credError;
+
         try {
             const params: Record<string, string> = {};
             if (startDate) params.startDate = startDate;
@@ -88,6 +101,9 @@ class ClickBankService {
     }
 
     async getProducts(): Promise<ClickBankProduct[] | ClickBankError> {
+        const credError = this.checkCredentials();
+        if (credError) return credError;
+
         try {
             const response = await this.axiosInstance.get(
                 '/rest/1.3/products/listings'
@@ -102,6 +118,9 @@ class ClickBankService {
     async getProductById(
         productId: string
     ): Promise<ClickBankProduct | ClickBankError> {
+        const credError = this.checkCredentials();
+        if (credError) return credError;
+
         try {
             const response = await this.axiosInstance.get(
                 `/rest/1.3/products/${productId}`
@@ -117,6 +136,9 @@ class ClickBankService {
         startDate: string,
         endDate: string
     ): Promise<ClickBankAnalytics | ClickBankError> {
+        const credError = this.checkCredentials();
+        if (credError) return credError;
+
         try {
             const response = await this.axiosInstance.get('/rest/1.3/analytics', {
                 params: { startDate, endDate },
@@ -137,6 +159,14 @@ class ClickBankService {
     }
 
     async healthCheck(): Promise<{ status: string; message: string }> {
+        const credError = this.checkCredentials();
+        if (credError) {
+            return {
+                status: 'error',
+                message: credError.message,
+            };
+        }
+
         try {
             await this.axiosInstance.get('/rest/1.3/products/listings');
             return {
