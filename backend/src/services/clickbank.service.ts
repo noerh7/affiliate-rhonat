@@ -42,16 +42,14 @@ class ClickBankService {
 
     /**
      * Génère les headers d'authentification pour ClickBank
-     * ClickBank utilise une authentification avec la clé API complète (incluant le préfixe API-)
+     * ClickBank utilise la clé API directement dans le header Authorization
+     * Format: Authorization: API-xxxxx (pas de Basic Auth, pas de base64)
      */
     private generateAuthHeaders(): Record<string, string> {
-        // ClickBank utilise Basic Auth avec la clé API complète
-        // La clé doit inclure le préfixe "API-" si présent
-        // Format: Basic base64(API_KEY)
-        const encodedCredentials = Buffer.from(this.apiKey).toString('base64');
-
+        // ClickBank utilise la clé API directement, sans encodage
+        // La clé doit inclure le préfixe "API-"
         return {
-            Authorization: `Basic ${encodedCredentials}`,
+            Authorization: this.apiKey,
         };
     }
 
@@ -139,17 +137,27 @@ class ClickBankService {
      */
     async getAnalytics(
         startDate: string,
-        endDate: string
+        endDate: string,
+        account: string = 'freenzy'
     ): Promise<ClickBankAnalytics | ClickBankError> {
         try {
-            const response = await this.axiosInstance.get('/rest/1.3/analytics', {
-                params: { startDate, endDate },
-            });
+            // Utiliser l'endpoint affiliate avec le paramètre account
+            const response = await this.axiosInstance.get(
+                '/rest/1.3/analytics/affiliate/vendor',
+                {
+                    params: {
+                        account,
+                        startDate,
+                        endDate,
+                        select: 'HOP_COUNT,SALE_COUNT',
+                    },
+                }
+            );
 
             return {
-                totalSales: response.data.totalSales || 0,
-                totalCommissions: response.data.totalCommissions || 0,
-                totalOrders: response.data.totalOrders || 0,
+                totalSales: response.data.totals?.SALE_COUNT || 0,
+                totalCommissions: 0,
+                totalOrders: response.data.totals?.HOP_COUNT || 0,
                 period: {
                     startDate,
                     endDate,
@@ -165,8 +173,19 @@ class ClickBankService {
      */
     async healthCheck(): Promise<{ status: string; message: string }> {
         try {
-            // Tentative de récupération des produits pour vérifier la connexion
-            await this.axiosInstance.get('/rest/1.3/products/listings');
+            // Utiliser l'endpoint affiliate analytics pour vérifier la connexion
+            const today = new Date().toISOString().split('T')[0];
+            await this.axiosInstance.get(
+                '/rest/1.3/analytics/affiliate/vendor',
+                {
+                    params: {
+                        account: 'freenzy',
+                        startDate: today,
+                        endDate: today,
+                        select: 'HOP_COUNT',
+                    },
+                }
+            );
             return {
                 status: 'ok',
                 message: 'ClickBank API is reachable',
