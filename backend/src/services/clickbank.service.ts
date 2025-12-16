@@ -91,6 +91,7 @@ class ClickBankService {
             type?: string;
             affiliate?: string;
             vendor?: string;
+            page?: number;
         }
     ): Promise<ClickBankOrder[] | ClickBankError> {
         try {
@@ -104,17 +105,40 @@ class ClickBankService {
 
             console.log('[ClickBank Service] Calling /rest/1.3/orders2/list with params:', params);
 
+            // Selon la doc: pagination via header 'Page'
+            const headers: Record<string, string> = {};
+            if (options?.page) {
+                headers['Page'] = String(options.page);
+            }
+
             const response = await this.axiosInstance.get('/rest/1.3/orders2/list', {
                 params,
+                headers,
             });
 
             console.log('[ClickBank Service] Orders response status:', response.status);
+            console.log('[ClickBank Service] Orders response data keys:', Object.keys(response.data || {}));
 
-            // L'API retourne { orderData: [...] } ou directement un tableau
-            const orders = response.data.orderData || response.data || [];
-            return Array.isArray(orders) ? orders : [];
-        } catch (error) {
+            // Selon la doc: la réponse contient orderData (peut être un tableau ou un objet unique)
+            let orders: any[] = [];
+
+            if (response.data) {
+                if (Array.isArray(response.data.orderData)) {
+                    orders = response.data.orderData;
+                } else if (response.data.orderData) {
+                    // Si c'est un seul objet, le mettre dans un tableau
+                    orders = [response.data.orderData];
+                } else if (Array.isArray(response.data)) {
+                    orders = response.data;
+                }
+            }
+
+            console.log('[ClickBank Service] Parsed orders count:', orders.length);
+            return orders;
+        } catch (error: any) {
             console.error('[ClickBank Service] Error in getOrders:', error);
+            console.error('[ClickBank Service] Error response:', error.response?.data);
+            console.error('[ClickBank Service] Error status:', error.response?.status);
             return this.handleError(error);
         }
     }
