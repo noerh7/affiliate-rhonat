@@ -448,59 +448,68 @@ export async function getClicksAnalytics(
   config: ClickBankConfig,
   filters: AnalyticsFilters = {}
 ): Promise<AnalyticsResponse> {
+  // Backend déployé sur Vercel (URL en dur)
+  const BACKEND_URL = 'https://affiliate-rhonat-delta.vercel.app';
+
   // Construire la clé API avec le préfixe API-
   const apiKey = config.apiKey.startsWith('API-')
     ? config.apiKey
     : `API-${config.apiKey}`;
 
-  // Valeurs par défaut
-  const role = (filters.role || 'AFFILIATE').toLowerCase();
-  const dimension = (filters.dimension || 'TRACKING_ID').toLowerCase();
-  const account = filters.account || 'freenzy';
-  const select = filters.select || 'HOP_COUNT,SALE_COUNT';
-
-  // Construction de l'URL directe vers ClickBank API
-  const endpoint = `${CLICKBANK_API_BASE_URL}/1.3/analytics/${role}/${dimension}`;
-
-  // Construction des paramètres de requête
+  // Construction des paramètres de requête pour le backend
   const params = new URLSearchParams();
+
+  // Paramètres obligatoires
   if (filters.startDate) params.append('startDate', filters.startDate);
   if (filters.endDate) params.append('endDate', filters.endDate);
-  params.append('select', select);
 
-  // Ajouter account si dimension est vendor
-  if (dimension === 'vendor') {
-    params.append('account', account);
+  // Paramètres optionnels avec valeurs par défaut
+  params.append('role', filters.role || 'AFFILIATE');
+  params.append('dimension', filters.dimension || 'TRACKING_ID');
+  params.append('select', filters.select || 'HOP_COUNT,SALE_COUNT');
+
+  // Account (requis pour dimension vendor)
+  if (filters.account) {
+    params.append('account', filters.account);
+  } else if ((filters.dimension || 'TRACKING_ID').toLowerCase() === 'vendor') {
+    params.append('account', 'freenzy'); // Valeur par défaut
   }
 
-  // Ajouter tracking ID si fourni
+  // Tracking ID optionnel
   if (filters.trackingId) {
     params.append('tid', filters.trackingId);
   }
 
-  const url = `${endpoint}?${params.toString()}`;
+  // URL complète vers le backend
+  const url = `${BACKEND_URL}/api/clickbank/analytics?${params.toString()}`;
 
-  console.log('[ClickBank Direct] Calling:', url);
+  console.log('[ClickBank Backend] Calling:', url);
+  console.log('[ClickBank Backend] Params:', Object.fromEntries(params));
 
   try {
-    // Appel direct à l'API ClickBank avec les bons en-têtes
+    // Appel au backend Vercel avec l'API key dans les headers
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': apiKey,
         'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
     });
 
-    console.log('[ClickBank Direct] Response status:', response.status);
+    console.log('[ClickBank Backend] Response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`ClickBank API Error (${response.status}): ${errorText}`);
+      console.error('[ClickBank Backend] Error response:', errorText);
+      throw new Error(`Backend API Error (${response.status}): ${errorText}`);
     }
 
-    const payload = await response.json();
-    console.log('[ClickBank Direct] Response data:', payload);
+    const result = await response.json();
+    console.log('[ClickBank Backend] Response data:', result);
+
+    // Le backend retourne { success: true, data: {...} }
+    const payload = result.success ? result.data : result;
 
     // Normaliser la réponse
     const clickDataArray = normalizeAnalyticsPayload(payload);
@@ -513,7 +522,7 @@ export async function getClicksAnalytics(
       },
     };
   } catch (error) {
-    console.error('Error fetching clicks analytics from ClickBank:', error);
+    console.error('[ClickBank Backend] Error fetching analytics:', error);
     throw error;
   }
 }
