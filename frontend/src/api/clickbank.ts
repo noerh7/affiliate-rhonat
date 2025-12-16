@@ -444,55 +444,65 @@ export async function getAllOrders(
   return allOrders;
 }
 
-/**
- * Récupère les statistiques de clics (Hops) pour les liens d'affiliation
- * 
- * @param config Configuration avec la clé API
- * @param filters Filtres optionnels (dates, trackingId)
- * @returns Statistiques de clics par Tracking ID
- */
 export async function getClicksAnalytics(
   config: ClickBankConfig,
   filters: AnalyticsFilters = {}
 ): Promise<AnalyticsResponse> {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/a2f4ff67-11fb-447c-ab87-7f5519201c61', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'clickbank.ts:391', message: 'getClicksAnalytics entry', data: { hasApiKey: !!config.apiKey, filters, CLICKBANK_PROXY_URL }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'C' }) }).catch(() => { });
-  // #endregion
-  const apiKey = stripApiKeyPrefix(config.apiKey || DEFAULT_DEV_KEY);
+  // Construire la clé API avec le préfixe API-
+  const apiKey = config.apiKey.startsWith('API-')
+    ? config.apiKey
+    : `API-${config.apiKey}`;
 
-  const proxyUrl = buildAnalyticsUrl(filters);
-  const role = filters.role || 'AFFILIATE';
-  const dimension = filters.dimension || 'TRACKING_ID';
-  const roleLower = role.toLowerCase();
-  const dimensionLower = dimension.toLowerCase();
-  const directUrl = `${CLICKBANK_API_BASE_URL}/1.3/analytics/${roleLower}/${dimensionLower}`;
+  // Valeurs par défaut
+  const role = (filters.role || 'AFFILIATE').toLowerCase();
+  const dimension = (filters.dimension || 'TRACKING_ID').toLowerCase();
+  const account = filters.account || 'freenzy';
+  const select = filters.select || 'HOP_COUNT,SALE_COUNT';
 
-  // Build fallback URL with query params
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/a2f4ff67-11fb-447c-ab87-7f5519201c61', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'clickbank.ts:410', message: 'getClicksAnalytics URLs built', data: { proxyUrl, role, dimension, usesVercelBackend: true }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
-  // #endregion
+  // Construction de l'URL directe vers ClickBank API
+  const endpoint = `${CLICKBANK_API_BASE_URL}/1.3/analytics/${role}/${dimension}`;
+
+  // Construction des paramètres de requête
+  const params = new URLSearchParams();
+  if (filters.startDate) params.append('startDate', filters.startDate);
+  if (filters.endDate) params.append('endDate', filters.endDate);
+  params.append('select', select);
+
+  // Ajouter account si dimension est vendor
+  if (dimension === 'vendor') {
+    params.append('account', account);
+  }
+
+  // Ajouter tracking ID si fourni
+  if (filters.trackingId) {
+    params.append('tid', filters.trackingId);
+  }
+
+  const url = `${endpoint}?${params.toString()}`;
+
+  console.log('[ClickBank Direct] Calling:', url);
 
   try {
-    const response = await fetchWithFallback(proxyUrl, {
+    // Appel direct à l'API ClickBank avec les bons en-têtes
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `API-${apiKey}`,
+        'Authorization': apiKey,
         'Accept': 'application/json',
       },
-    }, null, undefined);
+    });
 
-    const { data: payload, rawText } = await parseJsonResponse(response);
+    console.log('[ClickBank Direct] Response status:', response.status);
 
     if (!response.ok) {
-      const errorText =
-        typeof payload === 'string'
-          ? payload
-          : payload
-            ? JSON.stringify(payload)
-            : rawText || response.statusText;
+      const errorText = await response.text();
       throw new Error(`ClickBank API Error (${response.status}): ${errorText}`);
     }
 
+    const payload = await response.json();
+    console.log('[ClickBank Direct] Response data:', payload);
+
+    // Normaliser la réponse
     const clickDataArray = normalizeAnalyticsPayload(payload);
 
     return {
