@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
@@ -8,11 +8,6 @@ import {
   type AnalyticsResponse,
   type CreateAffiliateLinkResponse,
 } from '../api/clickbank';
-
-type ClickbankCredentials = {
-  nickname: string; // ici: UUID de l'influenceur que vous voulez tracer
-  developerKey: string;
-};
 
 function getDefaultDateRange(days = 7) {
   const end = new Date();
@@ -24,11 +19,9 @@ function getDefaultDateRange(days = 7) {
 
 export default function Clickbank() {
   const defaultRange = getDefaultDateRange();
-  const [credentials, setCredentials] = useState<ClickbankCredentials>({
-    nickname: '',
-    developerKey: 'API-KM27URMQL9C2275OIUEIX7FBMX4NHIM6VCHT',
-  });
-  const [saving, setSaving] = useState(false);
+  // API Key gérée en interne
+  const developerKey = 'API-KM27URMQL9C2275OIUEIX7FBMX4NHIM6VCHT';
+
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' } | null>(null);
 
   // États pour les statistiques de clics
@@ -54,33 +47,10 @@ export default function Clickbank() {
     trackingId: '',
   });
 
-  function handleChange(field: keyof ClickbankCredentials, value: string) {
-    setCredentials((prev) => ({ ...prev, [field]: value }));
-    // Si on modifie le nickname (UUID), on le pousse aussi dans le formulaire de lien
-    if (field === 'nickname') {
-      setLinkForm((prev) => ({ ...prev, affiliateNickname: value }));
-    }
-  }
 
-  async function handleSave(event: FormEvent) {
-    event.preventDefault();
-    if (!credentials.developerKey) {
-      setToast({ message: 'La Developer API Key est requise pour les appels.', type: 'error' });
-      return;
-    }
-
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      setToast({
-        message: "Clé sauvegardée localement. Le Nickname peut être votre UUID utilisateur pour vos HopLinks.",
-        type: 'success',
-      });
-    }, 350);
-  }
 
   async function handleGetClicks() {
-    if (!credentials.developerKey) {
+    if (!developerKey) {
       setToast({ message: 'Veuillez entrer votre Developer API Key', type: 'error' });
       return;
     }
@@ -109,8 +79,8 @@ export default function Clickbank() {
       if (account) filters.account = account;
 
       const response = await getClicksAnalytics({
-        apiKey: credentials.developerKey,
-        developerKey: credentials.developerKey,
+        apiKey: developerKey,
+        developerKey: developerKey,
       }, {
         role: 'AFFILIATE',
         ...filters,
@@ -132,7 +102,7 @@ export default function Clickbank() {
   }
 
   async function handleCreateLink() {
-    if (!credentials.developerKey) {
+    if (!developerKey) {
       setToast({ message: 'Veuillez entrer votre Developer API Key', type: 'error' });
       return;
     }
@@ -147,8 +117,8 @@ export default function Clickbank() {
 
     try {
       const response = await createAffiliateLink({
-        apiKey: credentials.developerKey,
-        developerKey: credentials.developerKey,
+        apiKey: developerKey,
+        developerKey: developerKey,
       }, linkForm);
 
       setLinkData(response);
@@ -182,50 +152,6 @@ export default function Clickbank() {
 
           {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-          <section className="card p-5 space-y-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Identifiants API</h2>
-                <p className="text-sm text-gray-600">
-                  Pour tester : seule la Developer API Key est nécessaire. Le Nickname sert à construire vos HopLinks
-                  (utilisez votre UUID utilisateur si vous le souhaitez).
-                </p>
-              </div>
-              <a
-                className="btn-ghost text-sm"
-                href="https://accounts.clickbank.com/developer-api-keys"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Créer mes clés
-              </a>
-            </div>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSave}>
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Influenceur (UUID)</span>
-                <input
-                  className="input"
-                  placeholder="UUID de l'influenceur (utilisé comme Nickname/HopLink)"
-                  value={credentials.nickname}
-                  onChange={(e) => handleChange('nickname', e.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Developer API Key</span>
-                <input
-                  className="input"
-                  placeholder="Ex: ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                  value={credentials.developerKey}
-                  onChange={(e) => handleChange('developerKey', e.target.value)}
-                />
-              </label>
-              <div className="flex items-end">
-                <button type="submit" className="btn-primary text-sm" disabled={saving}>
-                  {saving ? 'Sauvegarde...' : 'Sauvegarder'}
-                </button>
-              </div>
-            </form>
-          </section>
 
           {/* Section Statistiques de clics */}
           <section className="card p-5 space-y-4">
@@ -236,7 +162,7 @@ export default function Clickbank() {
               </div>
               <button
                 onClick={handleGetClicks}
-                disabled={loadingClicks || !credentials.developerKey}
+                disabled={loadingClicks || !developerKey}
                 className="btn-primary text-sm"
               >
                 {loadingClicks ? 'Chargement...' : 'Récupérer les clics'}
@@ -323,7 +249,7 @@ export default function Clickbank() {
               </div>
               <button
                 onClick={handleCreateLink}
-                disabled={creatingLink || !credentials.developerKey}
+                disabled={creatingLink || !developerKey}
                 className="btn-primary text-sm"
               >
                 {creatingLink ? 'Création...' : 'Créer le lien'}
