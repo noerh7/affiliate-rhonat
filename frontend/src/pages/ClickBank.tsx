@@ -2,12 +2,168 @@ import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Toast from '../components/Toast';
-import {
-  getClicksAnalytics,
-  createAffiliateLink,
-  type AnalyticsResponse,
-  type CreateAffiliateLinkResponse,
-} from '../api/clickbank';
+
+// ============================================================================
+// TYPES ET INTERFACES
+// ============================================================================
+
+interface ClickData {
+  trackingId: string;
+  vendor?: string;
+  hops: number;
+  sales: number;
+  refunds: number;
+  chargebacks: number;
+  earnings: number;
+  [key: string]: any;
+}
+
+interface AnalyticsResponse {
+  data: ClickData[];
+  period: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+interface AnalyticsFilters {
+  startDate?: string;
+  endDate?: string;
+  trackingId?: string;
+  account?: string;
+  dimension?: 'vendor' | 'TRACKING_ID';
+  select?: string;
+  role?: 'AFFILIATE' | 'VENDOR';
+}
+
+// ============================================================================
+// FONCTIONS UTILITAIRES
+// ============================================================================
+
+function normalizeAnalyticsPayload(payload: any): ClickData[] {
+  if (!payload) return [];
+
+  let rows: any[] = [];
+
+  if (payload.rows?.row) {
+    rows = Array.isArray(payload.rows.row) ? payload.rows.row : (payload.rows.row ? [payload.rows.row] : []);
+  } else if (Array.isArray(payload)) {
+    rows = payload;
+  } else if (Array.isArray(payload.data)) {
+    rows = payload.data;
+  } else if (Array.isArray(payload.analytics)) {
+    rows = payload.analytics;
+  } else if (Array.isArray(payload.analytics?.data)) {
+    rows = payload.analytics.data;
+  } else if (Array.isArray(payload.rows)) {
+    rows = payload.rows;
+  }
+
+  return rows.map((row: any) => {
+    const dimensionValue = row.dimensionValue || row.trackingId || row.tracking_id || row.tid || row.tracking || '';
+    const dataArray = row.data || [];
+
+    const metrics: any = {};
+    if (Array.isArray(dataArray)) {
+      dataArray.forEach((item: any) => {
+        if (item.attribute && item.value) {
+          const value = typeof item.value === 'object' && item.value.$ !== undefined
+            ? item.value.$
+            : item.value;
+          metrics[item.attribute.toLowerCase()] = Number(value) || 0;
+        }
+      });
+    }
+
+    return {
+      trackingId: dimensionValue,
+      vendor: row.dimensionValue || dimensionValue,
+      hops: Number(metrics.hop_count ?? row.hops ?? row.clicks ?? row.hopCount ?? 0),
+      sales: Number(metrics.sale_count ?? row.sales ?? row.saleCount ?? 0),
+      refunds: Number(row.refunds ?? row.refundCount ?? 0),
+      chargebacks: Number(row.chargebacks ?? row.chargebackCount ?? 0),
+      earnings: Number(row.earnings ?? row.amount ?? row.revenue ?? 0),
+      ...row,
+      ...metrics,
+    };
+  });
+}
+
+async function getClicksAnalytics(
+  apiKey: string,
+  filters: AnalyticsFilters = {}
+): Promise<AnalyticsResponse> {
+  // Backend déployé sur Vercel (URL en dur)
+  const BACKEND_URL = 'https://affiliate-rhonat-delta.vercel.app';
+
+  // Construire la clé API avec le préfixe API-
+  const formattedApiKey = apiKey.startsWith('API-') ? apiKey : `API-${apiKey}`;
+
+  // Construction des paramètres de requête pour le backend
+  const params = new URLSearchParams();
+
+  // Paramètres obligatoires
+  if (filters.startDate) params.append('startDate', filters.startDate);
+  if (filters.endDate) params.append('endDate', filters.endDate);
+
+  // Paramètres optionnels avec valeurs par défaut
+  params.append('role', filters.role || 'AFFILIATE');
+  params.append('dimension', filters.dimension || 'TRACKING_ID');
+  params.append('select', filters.select || 'HOP_COUNT,SALE_COUNT');
+
+  // Account (requis pour dimension vendor)
+  if (filters.account) {
+    params.append('account', filters.account);
+  } else if ((filters.dimension || 'TRACKING_ID').toLowerCase() === 'vendor') {
+    params.append('account', 'freenzy');
+  }
+
+  // URL complète vers le backend
+  const url = `${BACKEND_URL}/api/clickbank/analytics?${params.toString()}`;
+
+  console.log('[ClickBank Backend] Calling:', url);
+  console.log('[ClickBank Backend] Params:', Object.fromEntries(params));
+
+  try {
+    // Appel au backend Vercel avec l'API key dans les headers
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': formattedApiKey,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('[ClickBank Backend] Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[ClickBank Backend] Error response:', errorText);
+      throw new Error(`Backend API Error (${response.status}): ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('[ClickBank Backend] Response data:', result);
+
+    // Le backend retourne { success: true, data: {...} }
+    const payload = result.success ? result.data : result;
+
+    // Normaliser la réponse
+    const clickDataArray = normalizeAnalyticsPayload(payload);
+
+    return {
+      data: clickDataArray,
+      period: {
+        startDate: filters.startDate || '',
+        endDate: filters.endDate || '',
+      },
+    };
+  } catch (error) {
+    console.error('[ClickBank Backend] Error fetching analytics:', error);
+    throw error;
+  }
+}
 
 function getDefaultDateRange(days = 7) {
   const end = new Date();
@@ -16,6 +172,10 @@ function getDefaultDateRange(days = 7) {
   const format = (date: Date) => date.toISOString().slice(0, 10);
   return { start: format(start), end: format(end) };
 }
+
+// ============================================================================
+// COMPOSANT PRINCIPAL
+// ============================================================================
 
 export default function Clickbank() {
   const defaultRange = getDefaultDateRange();
@@ -28,9 +188,6 @@ export default function Clickbank() {
   const [loadingClicks, setLoadingClicks] = useState(false);
   const [clicksData, setClicksData] = useState<AnalyticsResponse | null>(null);
 
-  // États pour la création de lien
-  const [creatingLink, setCreatingLink] = useState(false);
-  const [linkData, setLinkData] = useState<CreateAffiliateLinkResponse | null>(null);
 
   // États pour les formulaires
   const [analyticsFilters, setAnalyticsFilters] = useState({
@@ -40,11 +197,6 @@ export default function Clickbank() {
     select: 'HOP_COUNT,SALE_COUNT',
     dimension: 'vendor',
     account: 'freenzy',
-  });
-  const [linkForm, setLinkForm] = useState({
-    affiliateNickname: '',
-    vendorNickname: '',
-    trackingId: '',
   });
 
 
@@ -70,18 +222,15 @@ export default function Clickbank() {
     setClicksData(null);
 
     try {
-      const filters: any = {};
+      const filters: AnalyticsFilters = {};
       if (analyticsFilters.startDate) filters.startDate = analyticsFilters.startDate;
       if (analyticsFilters.endDate) filters.endDate = analyticsFilters.endDate;
       if (analyticsFilters.trackingId) filters.trackingId = analyticsFilters.trackingId;
       if (metrics) filters.select = metrics;
-      if (dimension) filters.dimension = dimension.toUpperCase();
+      if (dimension) filters.dimension = dimension.toUpperCase() as 'vendor' | 'TRACKING_ID';
       if (account) filters.account = account;
 
-      const response = await getClicksAnalytics({
-        apiKey: developerKey,
-        developerKey: developerKey,
-      }, {
+      const response = await getClicksAnalytics(developerKey, {
         role: 'AFFILIATE',
         ...filters,
       });
@@ -101,40 +250,6 @@ export default function Clickbank() {
     }
   }
 
-  async function handleCreateLink() {
-    if (!developerKey) {
-      setToast({ message: 'Veuillez entrer votre Developer API Key', type: 'error' });
-      return;
-    }
-
-    if (!linkForm.affiliateNickname || !linkForm.vendorNickname || !linkForm.trackingId) {
-      setToast({ message: 'Veuillez remplir tous les champs du formulaire', type: 'error' });
-      return;
-    }
-
-    setCreatingLink(true);
-    setLinkData(null);
-
-    try {
-      const response = await createAffiliateLink({
-        apiKey: developerKey,
-        developerKey: developerKey,
-      }, linkForm);
-
-      setLinkData(response);
-      setToast({
-        message: 'Lien d\'affiliation créé avec succès !',
-        type: 'success',
-      });
-    } catch (error: any) {
-      setToast({
-        message: `Erreur: ${error.message}`,
-        type: 'error',
-      });
-    } finally {
-      setCreatingLink(false);
-    }
-  }
 
   return (
     <div className="app-background flex gap-6">
@@ -187,15 +302,6 @@ export default function Clickbank() {
                   onChange={(e) => setAnalyticsFilters({ ...analyticsFilters, endDate: e.target.value })}
                 />
               </label>
-              <label className="flex flex-col gap-1 md:col-span-2">
-                <span className="text-sm font-medium text-gray-700">Tracking ID (optionnel)</span>
-                <input
-                  className="input"
-                  placeholder="Filtrer par Tracking ID spécifique"
-                  value={analyticsFilters.trackingId}
-                  onChange={(e) => setAnalyticsFilters({ ...analyticsFilters, trackingId: e.target.value })}
-                />
-              </label>
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-gray-700">Dimension</span>
                 <select
@@ -238,65 +344,6 @@ export default function Clickbank() {
             )}
           </section>
 
-          {/* Section Création de lien d'affiliation */}
-          <section className="card p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Créer un lien d'affiliation</h2>
-                <p className="text-sm text-gray-600">
-                  Générez un HopLink en associant l'influenceur (UUID) et le produit ClickBank (nickname vendeur).
-                </p>
-              </div>
-              <button
-                onClick={handleCreateLink}
-                disabled={creatingLink || !developerKey}
-                className="btn-primary text-sm"
-              >
-                {creatingLink ? 'Création...' : 'Créer le lien'}
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Influenceur UUID *</span>
-                <input
-                  className="input"
-                  placeholder="UUID de l'influenceur (sera dans le HopLink)"
-                  value={linkForm.affiliateNickname}
-                  onChange={(e) => setLinkForm({ ...linkForm, affiliateNickname: e.target.value })}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Nickname Vendeur *</span>
-                <input
-                  className="input"
-                  placeholder="produitx"
-                  value={linkForm.vendorNickname}
-                  onChange={(e) => setLinkForm({ ...linkForm, vendorNickname: e.target.value })}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Tracking ID *</span>
-                <input
-                  className="input"
-                  placeholder="campagne_fb_1"
-                  value={linkForm.trackingId}
-                  onChange={(e) => setLinkForm({ ...linkForm, trackingId: e.target.value })}
-                />
-              </label>
-            </div>
-            {linkData && (
-              <div className="mt-4 space-y-2">
-                <h3 className="text-sm font-semibold">Lien créé avec succès:</h3>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium mb-2">URL du HopLink:</p>
-                  <code className="text-xs bg-white p-2 rounded block break-all">{linkData.link.url}</code>
-                </div>
-                <pre className="bg-gray-50 p-4 rounded-lg overflow-auto text-xs max-h-96">
-                  {JSON.stringify(linkData, null, 2)}
-                </pre>
-              </div>
-            )}
-          </section>
         </main>
       </div>
     </div>

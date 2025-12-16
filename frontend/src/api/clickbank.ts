@@ -7,13 +7,28 @@
  * - Créer des liens d'affiliation (HopLinks)
  */
 
-import {
-  CLICKBANK_API_PATH,
-  DEFAULT_DEV_KEY,
-  stripApiKeyPrefix,
-  buildHopLink,
-  MAX_PAGINATION_PAGES,
-} from '../config/clickbank.config';
+// ============================================================================
+// CONSTANTES
+// ============================================================================
+
+const CLICKBANK_API_PATH = '/api/clickbank';
+const DEFAULT_DEV_KEY = 'API-KM27URMQL9C2275OIUEIX7FBMX4NHIM6VCHT';
+const MAX_PAGINATION_PAGES = 1000;
+
+// Fonction pour nettoyer la clé API
+function stripApiKeyPrefix(apiKey: string): string {
+  if (!apiKey) return '';
+  return apiKey.startsWith('API-') ? apiKey.substring(4) : apiKey;
+}
+
+// Fonction pour construire un HopLink
+function buildHopLink(
+  affiliateNickname: string,
+  vendorNickname: string,
+  trackingId: string
+): string {
+  return `https://${affiliateNickname}.${vendorNickname}.hop.clickbank.net/?tid=${encodeURIComponent(trackingId)}`;
+}
 
 const envVars =
   typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env : {};
@@ -473,11 +488,6 @@ export async function getClicksAnalytics(
     params.append('account', filters.account);
   } else if ((filters.dimension || 'TRACKING_ID').toLowerCase() === 'vendor') {
     params.append('account', 'freenzy'); // Valeur par défaut
-  }
-
-  // Tracking ID optionnel
-  if (filters.trackingId) {
-    params.append('tid', filters.trackingId);
   }
 
   // URL complète vers le backend
