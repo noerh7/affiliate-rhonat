@@ -46,10 +46,14 @@ class ClickBankService {
      * Format: Authorization: API-xxxxx (pas de Basic Auth, pas de base64)
      */
     private generateAuthHeaders(): Record<string, string> {
-        // ClickBank utilise la clé API directement, sans encodage
-        // La clé doit inclure le préfixe "API-"
+        // S'assurer que la clé API a le préfixe "API-"
+        const apiKey = this.apiKey.startsWith('API-')
+            ? this.apiKey
+            : `API-${this.apiKey}`;
+
         return {
-            Authorization: this.apiKey,
+            'Authorization': apiKey,
+            'Accept': 'application/json',
         };
     }
 
