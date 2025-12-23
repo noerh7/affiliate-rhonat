@@ -33,5 +33,15 @@ serve(async (req) => {
     .eq("id", link.product_id)
     .single();
 
-  return Response.redirect(product.landing_url, 302);
+  // Créer un cookie avec le link_id pour le tracking des ventes
+  // Le cookie est valide pendant 30 jours
+  const cookieMaxAge = 30 * 24 * 60 * 60; // 30 jours en secondes
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      "Location": product.landing_url,
+      "Set-Cookie": `aff_link_id=${link.id}; Path=/; Max-Age=${cookieMaxAge}; SameSite=Lax`,
+    },
+  });
 });

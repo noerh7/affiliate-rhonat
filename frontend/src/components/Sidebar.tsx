@@ -16,6 +16,7 @@ export default function Sidebar() {
     { label: 'Approbations', path: '/approvals', icon: 'check' },
     { label: 'Paiements', path: '/payouts', icon: 'wallet' },
     { label: 'Test vente', path: '/test-sale', icon: 'sparkles' },
+    { label: 'Test Pixel', path: '/test-sale-pixel', icon: 'pixel' },
     { label: 'Admin reports', path: '/admin-reports', icon: 'shield' },
   ];
 
@@ -145,6 +146,13 @@ function SidebarIcon({ name }: { name: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 19h2M6 18v2" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 19h2M18 18v2" />
+        </svg>
+      );
+    case 'pixel':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10M7 12h10M7 17h6" />
         </svg>
       );
     case 'shield':

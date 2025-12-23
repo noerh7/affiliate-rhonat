@@ -15,6 +15,7 @@ import Payouts from './pages/Payouts';
 import ClickBankParent from './pages/ClickBankParent';
 import JVZoo from './pages/JVZoo';
 import TestSale from './pages/TestSale';
+import TestSalePixel from './pages/TestSalePixel';
 import AdminReports from './pages/AdminReports';
 import { useAuth } from './hooks/useAuth';
 
@@ -139,6 +140,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <TestSale />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/test-sale-pixel"
+          element={
+            <PrivateRoute>
+              <TestSalePixel />
             </PrivateRoute>
           }
         />
