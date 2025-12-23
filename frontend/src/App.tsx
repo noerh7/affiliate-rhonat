@@ -17,6 +17,7 @@ import JVZoo from './pages/JVZoo';
 import TestSale from './pages/TestSale';
 import TestSalePixel from './pages/TestSalePixel';
 import AdminReports from './pages/AdminReports';
+import Conversions from './pages/Conversions';
 import { useAuth } from './hooks/useAuth';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
@@ -156,6 +157,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <AdminReports />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/conversions"
+          element={
+            <PrivateRoute>
+              <Conversions />
             </PrivateRoute>
           }
         />

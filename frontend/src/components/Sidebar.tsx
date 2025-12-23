@@ -8,6 +8,7 @@ export default function Sidebar() {
   const navItems = [
     { label: 'Dashboard affilié', path: '/affiliate', icon: 'chart' },
     { label: 'Mes liens', path: '/links', icon: 'link' },
+    { label: 'Conversions', path: '/conversions', icon: 'conversion' },
     { label: 'Produits', path: '/products', icon: 'cube' },
     { label: 'Marketplace', path: '/marketplace', icon: 'store' },
     { label: 'ClickBank', path: '/clickbank', icon: 'clickbank' },
@@ -159,6 +160,14 @@ function SidebarIcon({ name }: { name: string }) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3 4 6v6c0 4.7 3.1 8.7 8 9 4.9-.3 8-4.3 8-9V6l-8-3z" />
+        </svg>
+      );
+    case 'conversion':
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M18 9l-5 5-3-3-4 4" />
+          <circle cx="18" cy="9" r="2" fill="currentColor" />
         </svg>
       );
     default:

@@ -216,6 +216,64 @@ Ce projet vous permet de :
 ✅ **Suivre vos ventes** et commissions  
 ✅ **Analyser vos performances** avec des statistiques  
 ✅ **Gérer vos affiliations** de manière professionnelle  
+✅ **Tracker les conversions** avec le système de pixel  
+
+## 🎯 Système de Tracking des Conversions
+
+### Vue d'ensemble
+
+Le système de tracking des conversions permet de **comptabiliser automatiquement les ventes** réalisées via vos liens d'affiliation en utilisant la **méthode pixel**.
+
+### Accès Rapide
+
+```
+http://localhost:5173/conversions
+```
+
+### Documentation Complète
+
+| Document | Description | Niveau |
+|----------|-------------|--------|
+| **[CONVERSIONS_QUICKSTART.md](./CONVERSIONS_QUICKSTART.md)** | ⚡ Démarrage ultra-rapide (3 min) | Débutant |
+| **[CONVERSIONS_README.md](./CONVERSIONS_README.md)** | 📘 README principal du système | Tous niveaux |
+| **[CONVERSIONS_QUICK_REFERENCE.md](./CONVERSIONS_QUICK_REFERENCE.md)** | 📙 Référence rapide et points clés | Tous niveaux |
+| **[GUIDE_CONVERSIONS_PIXEL.md](./GUIDE_CONVERSIONS_PIXEL.md)** | 📗 Guide complet avec exemples | Intermédiaire |
+| **[CONVERSIONS_IMPLEMENTATION_SUMMARY.md](./CONVERSIONS_IMPLEMENTATION_SUMMARY.md)** | 📕 Récapitulatif technique | Avancé |
+| **[CONVERSIONS_DOCUMENTATION_INDEX.md](./CONVERSIONS_DOCUMENTATION_INDEX.md)** | 📚 Index de navigation | Tous niveaux |
+
+### Fonctionnalités
+
+- 📊 **Statistiques en temps réel** : Conversions, revenus, commissions, taux de conversion
+- 🔧 **Générateur de pixel** : Code prêt à l'emploi avec copie en un clic
+- 📋 **Historique complet** : Tableau de toutes les ventes avec détails
+- 🎨 **Interface moderne** : Dashboard responsive avec design professionnel
+
+### Comment ça marche ?
+
+1. **Clic** → Cookie créé (30 jours)
+2. **Achat** → Page de confirmation
+3. **Pixel** → Vente enregistrée automatiquement
+4. **Dashboard** → Statistiques en temps réel
+
+### Démarrage Rapide
+
+```javascript
+// Code à intégrer sur votre page de confirmation
+<script>
+(function() {
+  var orderId = 'ORD-12345';  // Votre ID de commande
+  var amount = 99.90;          // Montant de la vente
+  
+  var img = new Image(1, 1);
+  img.src = 'https://votre-url.supabase.co/functions/v1/record-sale?order_id=' + orderId + '&amount=' + amount;
+  img.style.display = 'none';
+  document.body.appendChild(img);
+})();
+</script>
+```
+
+**Guide complet** : [CONVERSIONS_README.md](./CONVERSIONS_README.md)
+  
 
 ## 🚀 Prochaines étapes
 
