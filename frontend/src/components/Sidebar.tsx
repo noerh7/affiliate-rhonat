@@ -21,7 +21,6 @@ export default function Sidebar() {
     { label: t('nav.testSale'), path: '/test-sale', icon: 'sparkles' },
     { label: t('nav.testSalePixel'), path: '/test-sale-pixel', icon: 'pixel' },
     { label: t('nav.adminReports'), path: '/admin-reports', icon: 'shield' },
-    { label: t('common.helpCenter'), path: '/help', icon: 'help' },
   ];
 
   async function handleLogout() {
@@ -171,14 +170,6 @@ function SidebarIcon({ name }: { name: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M18 9l-5 5-3-3-4 4" />
           <circle cx="18" cy="9" r="2" fill="currentColor" />
-        </svg>
-      );
-    case 'help':
-      return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-          <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 17h.01" />
         </svg>
       );
     default:

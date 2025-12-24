@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
@@ -19,7 +20,7 @@ export default function Navbar() {
       <div className="hidden md:flex items-center gap-3">
         <span className="badge-soft">Beta</span>
         <LanguageSwitcher />
-        <button type="button" className="btn-ghost text-sm">{t('common.helpCenter')}</button>
+        <Link to="/help" className="btn-ghost text-sm">{t('common.helpCenter')}</Link>
       </div>
     </nav>
   );
