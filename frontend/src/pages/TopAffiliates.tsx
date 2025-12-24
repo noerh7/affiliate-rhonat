@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { getTopAffiliates } from '../api/affiliates';
 import AffiliateRankCard from '../components/marketplace/AffiliateRankCard';
 import Sidebar from '../components/Sidebar';
+import { useTranslation } from 'react-i18next';
 
 export default function TopAffiliates() {
+  const { t } = useTranslation();
   const [list, setList] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +63,8 @@ export default function TopAffiliates() {
     <div className="flex">
       <Sidebar />
       <main className="p-6 w-full">
-        <h1 className="text-2xl font-bold mb-6">Top affiliés</h1>
-        {loading && <div className="text-gray-600">Chargement du classement…</div>}
+        <h1 className="text-2xl font-bold mb-6">{t('topAffiliates.title')}</h1>
+        {loading && <div className="text-gray-600">{t('common.loading')}</div>}
         {!loading && error && (
           <div className="bg-red-50 text-red-700 p-4 rounded border border-red-200">{error}</div>
         )}

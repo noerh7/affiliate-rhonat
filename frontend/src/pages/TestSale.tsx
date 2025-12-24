@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { getAffiliateLinks } from '../api/affiliate';
 import Sidebar from '../components/Sidebar';
+import { useTranslation } from 'react-i18next';
 
 export default function TestSale() {
+  const { t } = useTranslation();
   const [links, setLinks] = useState<any[]>([]);
   const [selectedLink, setSelectedLink] = useState<any | null>(null);
   const [orderId, setOrderId] = useState<string>('');
@@ -34,13 +36,13 @@ export default function TestSale() {
 
   const simulateClick = () => {
     if (!selectedLink) return;
-    
+
     // Créer le cookie comme le ferait le système réel
     const COOKIE_NAME = 'aff_link_id';
     const COOKIE_VALUE = selectedLink.id;
     const COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 jours
     document.cookie = `${COOKIE_NAME}=${COOKIE_VALUE}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-    
+
     checkCookie();
     setResult({ success: true, message: `Cookie créé avec le link_id: ${selectedLink.id}` });
   };
@@ -69,11 +71,11 @@ export default function TestSale() {
       // Récupérer l'URL Supabase depuis les variables d'environnement
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
+
       if (!supabaseUrl || !supabaseAnonKey) {
-        setResult({ 
-          success: false, 
-          message: 'Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.' 
+        setResult({
+          success: false,
+          message: 'Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.'
         });
         setLoading(false);
         return;
@@ -81,25 +83,25 @@ export default function TestSale() {
 
       // Essayer d'abord l'Edge Function
       const edgeFunctionEndpoint = `${supabaseUrl}/functions/v1/record-sale`;
-      
+
       try {
         const response = await fetch(edgeFunctionEndpoint, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ 
-            link_id: selectedLink.id, 
-            order_id: orderId, 
-            amount: amountNum 
+          body: JSON.stringify({
+            link_id: selectedLink.id,
+            order_id: orderId,
+            amount: amountNum
           }),
         });
 
         if (response.ok) {
           const data = await response.json();
-          setResult({ 
-            success: true, 
-            message: `Vente enregistrée avec succès via Edge Function ! Order ID: ${orderId}, Montant: ${amountNum}€` 
+          setResult({
+            success: true,
+            message: `Vente enregistrée avec succès via Edge Function ! Order ID: ${orderId}, Montant: ${amountNum}€`
           });
           setOrderId('');
           setAmount('99.90');
@@ -112,10 +114,10 @@ export default function TestSale() {
       } catch (edgeError: any) {
         // Fallback 1 : Essayer la fonction RPC record_sale
         console.log('Edge Function non disponible, essai de la fonction RPC record_sale');
-        
+
         try {
           const { supabase } = await import('../api/supabase');
-          
+
           const { data, error: rpcError } = await supabase.rpc('record_sale', {
             p_link_id: selectedLink.id,
             p_order_id: orderId,
@@ -134,9 +136,9 @@ export default function TestSale() {
             throw new Error(data?.error || 'Erreur lors de l\'enregistrement de la vente');
           }
 
-          setResult({ 
-            success: true, 
-            message: `Vente enregistrée avec succès via fonction RPC ! Order ID: ${orderId}, Montant: ${amountNum}€, Commission: ${data.commission?.toFixed(2)}€` 
+          setResult({
+            success: true,
+            message: `Vente enregistrée avec succès via fonction RPC ! Order ID: ${orderId}, Montant: ${amountNum}€, Commission: ${data.commission?.toFixed(2)}€`
           });
           setOrderId('');
           setAmount('99.90');
@@ -146,7 +148,7 @@ export default function TestSale() {
           // Fallback 2 : Utiliser l'API REST directe (si les politiques RLS le permettent)
           if (rpcError.message === 'FUNCTION_NOT_FOUND') {
             console.log('Fonction RPC non disponible, utilisation de l\'API REST directe');
-            
+
             // Récupérer le produit pour calculer la commission
             const productResponse = await fetch(
               `${supabaseUrl}/rest/v1/products?id=eq.${selectedLink.product_id}&select=commission_percent`,
@@ -195,9 +197,9 @@ export default function TestSale() {
               throw new Error(`Erreur API REST: ${salesResponse.status} - ${errorText}. Assurez-vous d'avoir exécuté la migration 11_allow_sales_insert.sql pour créer les politiques RLS.`);
             }
 
-            setResult({ 
-              success: true, 
-              message: `Vente enregistrée avec succès via API REST ! Order ID: ${orderId}, Montant: ${amountNum}€, Commission: ${commission.toFixed(2)}€` 
+            setResult({
+              success: true,
+              message: `Vente enregistrée avec succès via API REST ! Order ID: ${orderId}, Montant: ${amountNum}€, Commission: ${commission.toFixed(2)}€`
             });
             setOrderId('');
             setAmount('99.90');
@@ -209,19 +211,19 @@ export default function TestSale() {
       }
     } catch (error: any) {
       console.error('Erreur complète:', error);
-        let errorMessage = error.message || 'Erreur de connexion';
-        
-        // Messages d'erreur plus explicites
-        if (error.message?.includes('permission denied') || error.message?.includes('new row violates row-level security')) {
-          errorMessage = 'Permission refusée. Vérifiez que la migration 11_allow_sales_insert.sql a été exécutée pour permettre l\'insertion de ventes.';
-        } else if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
-          errorMessage = 'Connexion bloquée. Vérifiez que l\'Edge Function record-sale est déployée sur Supabase, ou que les politiques RLS permettent l\'insertion.';
-        }
-        
-        setResult({ 
-          success: false, 
-          message: `Erreur: ${errorMessage}` 
-        });
+      let errorMessage = error.message || 'Erreur de connexion';
+
+      // Messages d'erreur plus explicites
+      if (error.message?.includes('permission denied') || error.message?.includes('new row violates row-level security')) {
+        errorMessage = 'Permission refusée. Vérifiez que la migration 11_allow_sales_insert.sql a été exécutée pour permettre l\'insertion de ventes.';
+      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+        errorMessage = 'Connexion bloquée. Vérifiez que l\'Edge Function record-sale est déployée sur Supabase, ou que les politiques RLS permettent l\'insertion.';
+      }
+
+      setResult({
+        success: false,
+        message: `Erreur: ${errorMessage}`
+      });
     } finally {
       setLoading(false);
     }
@@ -237,7 +239,7 @@ export default function TestSale() {
     <div className="flex">
       <Sidebar />
       <main className="p-6 w-full max-w-4xl">
-        <h1 className="text-2xl font-bold mb-6">Test de Tracking des Ventes</h1>
+        <h1 className="text-2xl font-bold mb-6">{t('testSale.title')}</h1>
 
         <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6 text-sm text-blue-800">
           <strong>💡 Comment tester :</strong>
@@ -326,17 +328,16 @@ export default function TestSale() {
               disabled={loading || !selectedLink || !orderId || !amount}
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Enregistrement...' : 'Tester l\'enregistrement de la vente'}
+              {loading ? t('common.loading') : t('testSale.testSale')}
             </button>
           </div>
         </div>
 
         {result && (
-          <div className={`p-4 rounded border ${
-            result.success 
-              ? 'bg-green-50 border-green-200 text-green-800' 
+          <div className={`p-4 rounded border ${result.success
+              ? 'bg-green-50 border-green-200 text-green-800'
               : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
+            }`}>
             <strong>{result.success ? '✓ Succès' : '✗ Erreur'}</strong>
             <p className="mt-1">{result.message}</p>
           </div>

@@ -1,24 +1,26 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../api/supabase';
+import { useTranslation } from 'react-i18next';
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
   const navItems = [
-    { label: 'Dashboard affilié', path: '/affiliate', icon: 'chart' },
-    { label: 'Mes liens', path: '/links', icon: 'link' },
-    { label: 'Conversions', path: '/conversions', icon: 'conversion' },
-    { label: 'Produits', path: '/products', icon: 'cube' },
-    { label: 'Marketplace', path: '/marketplace', icon: 'store' },
-    { label: 'ClickBank', path: '/clickbank', icon: 'clickbank' },
-    { label: 'JVZoo', path: '/jvzoo', icon: 'jvzoo' },
-    { label: 'Top affiliés', path: '/top-affiliates', icon: 'trophy' },
-    { label: 'Approbations', path: '/approvals', icon: 'check' },
-    { label: 'Paiements', path: '/payouts', icon: 'wallet' },
-    { label: 'Test vente', path: '/test-sale', icon: 'sparkles' },
-    { label: 'Test Pixel', path: '/test-sale-pixel', icon: 'pixel' },
-    { label: 'Admin reports', path: '/admin-reports', icon: 'shield' },
+    { label: t('nav.affiliate'), path: '/affiliate', icon: 'chart' },
+    { label: t('nav.links'), path: '/links', icon: 'link' },
+    { label: t('nav.conversions'), path: '/conversions', icon: 'conversion' },
+    { label: t('nav.products'), path: '/products', icon: 'cube' },
+    { label: t('nav.marketplace'), path: '/marketplace', icon: 'store' },
+    { label: t('nav.clickbank'), path: '/clickbank', icon: 'clickbank' },
+    { label: t('nav.jvzoo'), path: '/jvzoo', icon: 'jvzoo' },
+    { label: t('nav.topAffiliates'), path: '/top-affiliates', icon: 'trophy' },
+    { label: t('nav.approvals'), path: '/approvals', icon: 'check' },
+    { label: t('nav.payouts'), path: '/payouts', icon: 'wallet' },
+    { label: t('nav.testSale'), path: '/test-sale', icon: 'sparkles' },
+    { label: t('nav.testSalePixel'), path: '/test-sale-pixel', icon: 'pixel' },
+    { label: t('nav.adminReports'), path: '/admin-reports', icon: 'shield' },
   ];
 
   async function handleLogout() {
@@ -34,7 +36,7 @@ export default function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold">Rhonat Affiliations</p>
-          <span className="text-xs text-gray-600">Vue synthétique</span>
+          <span className="text-xs text-gray-600">{t('sidebar.overview')}</span>
         </div>
       </div>
 
@@ -66,7 +68,7 @@ export default function Sidebar() {
           <path d="M16 17l5-5-5-5" />
           <path d="M21 12H9" />
         </svg>
-        Se déconnecter
+        {t('sidebar.logout')}
       </button>
     </aside>
   );

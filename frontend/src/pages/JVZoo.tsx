@@ -9,14 +9,16 @@ import {
   type JVZooOffer,
   type JVZooConnectionResult,
 } from '../api/jvzoo';
+import { useTranslation } from 'react-i18next';
 
 type JVZooCredentials = {
   apiKey: string;
   apiSecret: string;
-  affiliateId: string; // peut être l'UUID de l'influenceur
+  affiliateId: string;
 };
 
 export default function JVZoo() {
+  const { t } = useTranslation();
   const [credentials, setCredentials] = useState<JVZooCredentials>({
     apiKey: 'd5d993ae581978c19fa97a324b7daeb2fd67d00b353a71fcc7540c2d1a25f50b',
     apiSecret: '',
@@ -142,7 +144,7 @@ export default function JVZoo() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm text-gray-500 font-medium">Connecteur partenaires</p>
-              <h1 className="text-2xl font-bold">JVZoo</h1>
+              <h1 className="text-2xl font-bold">{t('jvzoo.title')}</h1>
             </div>
             <a
               className="badge-soft"
@@ -199,7 +201,7 @@ export default function JVZoo() {
               </label>
               <div className="flex items-end">
                 <button type="submit" className="btn-primary text-sm" disabled={saving}>
-                  {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                  {saving ? t('common.loading') : t('common.save')}
                 </button>
               </div>
             </form>
@@ -229,7 +231,7 @@ export default function JVZoo() {
                 <p className="text-sm text-gray-600">Récupérez les offres disponibles depuis l'API JVZoo.</p>
               </div>
               <button onClick={handleLoadOffers} disabled={loadingOffers} className="btn-ghost text-sm">
-                {loadingOffers ? 'Chargement...' : 'Rafraîchir'}
+                {loadingOffers ? t('common.loading') : t('common.refresh')}
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

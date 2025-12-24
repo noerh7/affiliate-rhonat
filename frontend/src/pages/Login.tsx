@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../api/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 type Mode = 'login' | 'signup' | 'reset' | 'recovery';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +30,7 @@ export default function Login() {
           })
           .then(({ error }) => {
             if (error) {
-              alert(`Erreur lors de l'établissement de la session de récupération: ${error.message}`);
+              alert(`${t('auth.success.sessionRecoveryError')}: ${error.message}`);
             } else {
               setMode('recovery');
               // Nettoie l'URL pour éviter de retraiter le hash
@@ -42,7 +44,7 @@ export default function Login() {
 
   async function handleLogin() {
     if (!email || !password) {
-      alert('Veuillez remplir email et mot de passe');
+      alert(t('auth.errors.fillEmailPassword'));
       return;
     }
     setLoading(true);
@@ -60,11 +62,11 @@ export default function Login() {
 
   async function handleSignUp() {
     if (!email || !password) {
-      alert('Veuillez remplir email et mot de passe');
+      alert(t('auth.errors.fillEmailPassword'));
       return;
     }
     if (password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      alert(t('auth.errors.passwordLength'));
       return;
     }
     setLoading(true);
@@ -77,16 +79,16 @@ export default function Login() {
     });
     setLoading(false);
     if (error) {
-      alert(`Erreur: ${error.message}`);
+      alert(`${t('common.error')}: ${error.message}`);
     } else {
-      alert('Compte créé ! Vérifie tes emails pour confirmer ton compte.');
+      alert(t('auth.success.accountCreated'));
       setMode('login');
     }
   }
 
   async function handleResetRequest() {
     if (!email) {
-      alert('Veuillez saisir votre email pour réinitialiser le mot de passe.');
+      alert(t('auth.errors.enterEmail'));
       return;
     }
     setLoading(true);
@@ -95,33 +97,33 @@ export default function Login() {
     });
     setLoading(false);
     if (error) {
-      alert(`Erreur: ${error.message}`);
+      alert(`${t('common.error')}: ${error.message}`);
     } else {
-      alert('Email de réinitialisation envoyé. Consulte ta boîte mail.');
+      alert(t('auth.success.resetEmailSent'));
       setMode('login');
     }
   }
 
   async function handlePasswordUpdate() {
     if (!password || !passwordConfirm) {
-      alert('Veuillez saisir et confirmer le nouveau mot de passe.');
+      alert(t('auth.errors.enterConfirmPassword'));
       return;
     }
     if (password !== passwordConfirm) {
-      alert('Les mots de passe ne correspondent pas.');
+      alert(t('auth.errors.passwordMismatch'));
       return;
     }
     if (password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      alert(t('auth.errors.passwordLength'));
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (error) {
-      alert(`Erreur lors de la mise à jour: ${error.message}`);
+      alert(`${t('common.error')}: ${error.message}`);
     } else {
-      alert('Mot de passe mis à jour. Vous pouvez vous connecter.');
+      alert(t('auth.success.passwordUpdated'));
       setMode('login');
       setPassword('');
       setPasswordConfirm('');
@@ -136,8 +138,8 @@ export default function Login() {
             RH
           </div>
           <div>
-            <h2 className="text-xl font-semibold leading-tight">Espace affilié</h2>
-            <p className="text-sm text-gray-500">Connectez-vous ou créez votre accès</p>
+            <h2 className="text-xl font-semibold leading-tight">{t('auth.title')}</h2>
+            <p className="text-sm text-gray-500">{t('auth.subtitle')}</p>
           </div>
         </div>
         <div className="flex gap-2 justify-center text-sm">
@@ -145,19 +147,19 @@ export default function Login() {
             className={`btn-ghost ${mode === 'login' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''}`}
             onClick={() => setMode('login')}
           >
-            Connexion
+            {t('auth.login')}
           </button>
           <button
             className={`btn-ghost ${mode === 'signup' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''}`}
             onClick={() => setMode('signup')}
           >
-            Création de compte
+            {t('auth.signup')}
           </button>
           <button
             className={`btn-ghost ${mode === 'reset' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''}`}
             onClick={() => setMode('reset')}
           >
-            Mot de passe oublié
+            {t('auth.forgotPassword')}
           </button>
         </div>
 
@@ -165,22 +167,22 @@ export default function Login() {
           <>
             <input
               className="input text-sm"
-              placeholder="Email"
+              placeholder={t('auth.email')}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <input
               className="input text-sm"
               type="password"
-              placeholder="Mot de passe"
+              placeholder={t('auth.password')}
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
             <button className="btn-primary text-sm" onClick={handleLogin} disabled={loading}>
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
             <button className="text-xs underline self-start text-gray-600 hover:text-blue-700" onClick={() => setMode('reset')}>
-              Mot de passe oublié ?
+              {t('auth.forgotPasswordLink')}
             </button>
           </>
         )}
@@ -189,22 +191,22 @@ export default function Login() {
           <>
             <input
               className="input text-sm"
-              placeholder="Email"
+              placeholder={t('auth.email')}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <input
               className="input text-sm"
               type="password"
-              placeholder="Mot de passe (min 6 caractères)"
+              placeholder={t('auth.passwordMin')}
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
             <button className="btn-primary text-sm" onClick={handleSignUp} disabled={loading}>
-              {loading ? 'Création...' : 'Créer un compte'}
+              {loading ? t('auth.creatingAccount') : t('auth.signUp')}
             </button>
             <p className="text-xs text-gray-500">
-              Un email de confirmation est envoyé. Après validation, connectez-vous.
+              {t('auth.confirmationEmailSent')}
             </p>
           </>
         )}
@@ -213,38 +215,38 @@ export default function Login() {
           <>
             <input
               className="input text-sm"
-              placeholder="Email"
+              placeholder={t('auth.email')}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <button className="btn-primary text-sm" onClick={handleResetRequest} disabled={loading}>
-              {loading ? 'Envoi...' : 'Envoyer le lien de réinitialisation'}
+              {loading ? t('auth.sending') : t('auth.sendResetLink')}
             </button>
             <p className="text-xs text-gray-500">
-              Vous recevrez un lien email. Ouvrez-le pour définir un nouveau mot de passe.
+              {t('auth.resetEmailSent')}
             </p>
           </>
         )}
 
         {mode === 'recovery' && (
           <>
-            <p className="text-sm">Définissez un nouveau mot de passe.</p>
+            <p className="text-sm">{t('auth.setNewPassword')}</p>
             <input
               className="input text-sm"
               type="password"
-              placeholder="Nouveau mot de passe"
+              placeholder={t('auth.newPassword')}
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
             <input
               className="input text-sm"
               type="password"
-              placeholder="Confirmer le mot de passe"
+              placeholder={t('auth.confirmPassword')}
               value={passwordConfirm}
               onChange={e => setPasswordConfirm(e.target.value)}
             />
             <button className="btn-primary text-sm" onClick={handlePasswordUpdate} disabled={loading}>
-              {loading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+              {loading ? t('auth.updating') : t('auth.updatePassword')}
             </button>
           </>
         )}

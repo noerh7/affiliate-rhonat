@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
+import { useTranslation } from 'react-i18next';
 
 export default function TestSalePixel() {
+    const { t } = useTranslation();
     const [orderId, setOrderId] = useState<string>('');
     const [amount, setAmount] = useState<string>('99.90');
     const [pixelUrl, setPixelUrl] = useState<string>('');
@@ -135,11 +137,11 @@ export default function TestSalePixel() {
         <div className="flex">
             <Sidebar />
             <main className="p-6 w-full max-w-4xl">
-                <h1 className="text-2xl font-bold mb-6">Test du Pixel de Tracking des Ventes</h1>
+                <h1 className="text-2xl font-bold mb-6">{t('testSalePixel.title')}</h1>
 
                 <div className={`p-4 rounded border mb-6 ${cookieValue
-                        ? 'bg-green-50 border-green-200'
-                        : 'bg-orange-50 border-orange-200'
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-orange-50 border-orange-200'
                     }`}>
                     <div className="flex items-center justify-between">
                         <div>
@@ -156,8 +158,8 @@ export default function TestSalePixel() {
                         <button
                             onClick={checkCookie}
                             className={`px-3 py-1 text-sm rounded ${cookieValue
-                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                    : 'bg-orange-600 hover:bg-orange-700 text-white'
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'bg-orange-600 hover:bg-orange-700 text-white'
                                 }`}
                         >
                             Actualiser
@@ -254,7 +256,7 @@ export default function TestSalePixel() {
                                 disabled={loading}
                                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Déclenchement en cours...' : 'Déclencher le Pixel'}
+                                {loading ? t('common.loading') : t('testSalePixel.firePixel')}
                             </button>
                             <p className="text-sm text-gray-600">
                                 Cliquez sur ce bouton pour simuler le chargement du pixel et enregistrer la vente.

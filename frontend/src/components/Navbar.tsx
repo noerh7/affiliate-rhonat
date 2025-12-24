@@ -1,4 +1,9 @@
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+
 export default function Navbar() {
+  const { t } = useTranslation();
+
   return (
     <nav className="nav-blur w-full px-6 py-4 flex items-center justify-between rounded-2xl shadow-sm mb-6">
       <div className="flex items-center gap-3">
@@ -13,6 +18,7 @@ export default function Navbar() {
 
       <div className="hidden md:flex items-center gap-3">
         <span className="badge-soft">Beta</span>
+        <LanguageSwitcher />
         <button type="button" className="btn-ghost text-sm">Centre d'aide</button>
       </div>
     </nav>

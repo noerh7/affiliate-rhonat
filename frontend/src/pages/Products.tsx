@@ -5,6 +5,7 @@ import { createAffiliateLink } from '../api/affiliate';
 import { createBrand, getBrands } from '../api/brands';
 import Sidebar from '../components/Sidebar';
 import Toast from '../components/Toast';
+import { useTranslation } from 'react-i18next';
 
 type Product = {
   id: string;
@@ -16,6 +17,7 @@ type Product = {
 };
 
 export default function Products() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -61,7 +63,7 @@ export default function Products() {
 
   async function handleCreateBrand() {
     if (!brandForm.name || !brandForm.domain) {
-      setToast({ message: 'Nom et domaine sont requis pour créer une marque.', type: 'error' });
+      setToast({ message: t('forms.required'), type: 'error' });
       return;
     }
     setCreatingBrand(true);
@@ -72,13 +74,13 @@ export default function Products() {
       return;
     }
     setBrandForm({ name: '', domain: '' });
-    setToast({ message: 'Marque créée.', type: 'success' });
+    setToast({ message: t('common.success'), type: 'success' });
     refreshBrands();
   }
 
   async function handleCreateProduct() {
     if (!form.name || !form.price || !form.landing_url || !form.brand_id) {
-      setToast({ message: 'Tous les champs sont requis.', type: 'error' });
+      setToast({ message: t('forms.required'), type: 'error' });
       return;
     }
 
@@ -103,7 +105,7 @@ export default function Products() {
       return;
     }
     setForm((f) => ({ ...f, name: '', price: '', landing_url: '' }));
-    setToast({ message: 'Produit créé.', type: 'success' });
+    setToast({ message: t('common.success'), type: 'success' });
     refreshProducts();
   }
 
@@ -112,7 +114,7 @@ export default function Products() {
     const { error } = await createAffiliateLink(productId);
     setCreatingLinkId(null);
     if (error) setToast({ message: error.message, type: 'error' });
-    else setToast({ message: 'Lien créé ! Retrouve-le dans l’onglet Mes liens.', type: 'success' });
+    else setToast({ message: t('links.linkCopied'), type: 'success' });
   }
 
   return (
@@ -124,7 +126,7 @@ export default function Products() {
             <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
           </div>
         )}
-        <h1 className="text-2xl font-bold">Produits</h1>
+        <h1 className="text-2xl font-bold">{t('products.title')}</h1>
 
         <div className="bg-white p-4 rounded shadow space-y-3">
           <h2 className="text-lg font-semibold">Créer une marque</h2>
@@ -147,7 +149,7 @@ export default function Products() {
             onClick={handleCreateBrand}
             disabled={creatingBrand}
           >
-            {creatingBrand ? 'Création…' : 'Créer la marque'}
+            {creatingBrand ? t('common.loading') : t('products.createProduct')}
           </button>
           <p className="text-sm text-gray-600">
             Crée au moins une marque pour alimenter la liste déroulante des produits.
@@ -211,13 +213,13 @@ export default function Products() {
             onClick={handleCreateProduct}
             disabled={creatingProduct || brands.length === 0}
           >
-            {creatingProduct ? 'Création...' : 'Créer le produit'}
+            {creatingProduct ? t('common.loading') : t('products.createProduct')}
           </button>
         </div>
 
-        {loading && <div className="text-gray-600 mb-2">Chargement des produits…</div>}
+        {loading && <div className="text-gray-600 mb-2">{t('common.loading')}</div>}
         {!loading && products.length === 0 && (
-          <div className="bg-white p-4 rounded shadow text-gray-600">Aucun produit disponible pour le moment.</div>
+          <div className="bg-white p-4 rounded shadow text-gray-600">{t('products.noProducts')}</div>
         )}
 
         <div className="grid grid-cols-3 gap-4">
@@ -239,7 +241,7 @@ export default function Products() {
                 onClick={() => handleCreateLink(p.id)}
                 disabled={creatingLinkId === p.id}
               >
-                {creatingLinkId === p.id ? 'Création du lien…' : 'Créer un lien d’affiliation'}
+                {creatingLinkId === p.id ? t('common.loading') : t('links.createLink')}
               </button>
             </div>
           ))}

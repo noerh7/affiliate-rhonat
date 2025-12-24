@@ -3,8 +3,10 @@ import { getMarketplaceProducts } from '../api/marketplace';
 import ProductCard from '../components/marketplace/ProductCard';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { useTranslation } from 'react-i18next';
 
 export default function Marketplace() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -23,16 +25,16 @@ export default function Marketplace() {
         <main className="page-surface p-6 w-full">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <p className="text-sm text-gray-500 font-medium">Sélection des marques</p>
-              <h1 className="text-2xl font-bold">Marketplace des Produits</h1>
+              <p className="text-sm text-gray-500 font-medium">{t('marketplace.browseProducts')}</p>
+              <h1 className="text-2xl font-bold">{t('marketplace.title')}</h1>
             </div>
-            <button type="button" className="btn-ghost text-sm">Filtrer</button>
+            <button type="button" className="btn-ghost text-sm">{t('tables.filter')}</button>
           </div>
 
-          {loading && <div className="text-gray-600 mb-2">Chargement des offres…</div>}
+          {loading && <div className="text-gray-600 mb-2">{t('common.loading')}</div>}
           {!loading && products.length === 0 && (
             <div className="card p-4 text-gray-600">
-              Aucune offre disponible pour le moment. Revenez plus tard ou contactez une marque.
+              {t('products.noProducts')}
             </div>
           )}
 

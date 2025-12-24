@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ============================================================================
 // TYPES ET INTERFACES
@@ -108,6 +109,7 @@ function getDefaultDateRange(days = 30) {
 // ============================================================================
 
 export default function ClickBankVente() {
+    const { t } = useTranslation();
     const defaultRange = getDefaultDateRange();
     const developerKey = 'API-KM27URMQL9C2275OIUEIX7FBMX4NHIM6VCHT';
 
@@ -216,7 +218,7 @@ export default function ClickBankVente() {
                         disabled={loading}
                         className="btn-primary text-sm"
                     >
-                        {loading ? 'Chargement...' : 'Récupérer les ventes'}
+                        {loading ? t('common.loading') : t('clickbank.getSales')}
                     </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

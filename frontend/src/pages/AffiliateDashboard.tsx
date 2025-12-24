@@ -7,8 +7,10 @@ import EpcCard from '../components/analytics/EpcCard';
 import HeatmapClicks from '../components/analytics/HeatmapClicks';
 import ClicksDetails from '../components/analytics/ClicksDetails';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function AffiliateDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { stats, loading, error } = useStats();
 
@@ -20,11 +22,11 @@ export default function AffiliateDashboard() {
       <Sidebar />
       <main className="p-6 w-full flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Dashboard Affilié Avancé</h1>
-          {loading && <span className="text-sm text-gray-500">Chargement…</span>}
+          <h1 className="text-2xl font-bold">{t('nav.affiliate')}</h1>
+          {loading && <span className="text-sm text-gray-500">{t('common.loading')}</span>}
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded border border-red-200 max-w-2xl">
-              <strong>Erreur :</strong> {error}
+              <strong>{t('common.error')} :</strong> {error}
               {error.includes('migration SQL') && (
                 <div className="mt-2 text-xs text-red-700">
                   <p className="font-semibold">Solution :</p>
@@ -46,9 +48,9 @@ export default function AffiliateDashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Clics" value={stats?.clicks ?? 0} />
-          <StatCard label="Ventes" value={stats?.sales ?? 0} />
-          <StatCard label="Revenus" value={`${stats?.revenue ?? 0}€`} />
+          <StatCard label={t('dashboard.totalClicks')} value={stats?.clicks ?? 0} />
+          <StatCard label={t('links.sales')} value={stats?.sales ?? 0} />
+          <StatCard label={t('dashboard.revenue')} value={`${stats?.revenue ?? 0}€`} />
         </div>
 
         <div className="grid grid-cols-3 gap-4">

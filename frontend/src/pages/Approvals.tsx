@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { getApprovals } from '../api/approvals';
 import Sidebar from '../components/Sidebar';
+import { useTranslation } from 'react-i18next';
 
 export default function Approvals() {
+  const { t } = useTranslation();
   const [approvals, setApprovals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -17,11 +19,11 @@ export default function Approvals() {
     <div className="flex">
       <Sidebar />
       <main className="p-6 w-full">
-        <h1 className="text-xl font-bold mb-4">Mes demandes d'approbation</h1>
-        {loading && <div className="text-gray-600">Chargement des demandes…</div>}
+        <h1 className="text-xl font-bold mb-4">{t('approvals.title')}</h1>
+        {loading && <div className="text-gray-600">{t('common.loading')}</div>}
         {!loading && approvals.length === 0 && (
           <div className="bg-white p-4 rounded shadow text-gray-600">
-            Aucune demande pour l'instant. Demande l'accès à un produit depuis la Marketplace.
+            {t('approvals.noRequests')}
           </div>
         )}
         {approvals.map((a) => (

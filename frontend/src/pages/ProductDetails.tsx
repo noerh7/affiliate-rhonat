@@ -5,8 +5,10 @@ import { getBrands } from '../api/brands';
 import { updateProduct, deleteProduct } from '../api/products';
 import Sidebar from '../components/Sidebar';
 import Toast from '../components/Toast';
+import { useTranslation } from 'react-i18next';
 
 export default function ProductDetails() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
@@ -62,7 +64,7 @@ export default function ProductDetails() {
   async function handleUpdate() {
     if (!id) return;
     if (!form.name || !form.price || !form.landing_url || !form.brand_id) {
-      alert('Tous les champs sont requis.');
+      alert(t('forms.required'));
       return;
     }
 
@@ -95,12 +97,12 @@ export default function ProductDetails() {
       brand_id: form.brand_id,
       brand: brands.find((b) => b.id === form.brand_id) ?? p?.brand,
     }));
-    setToast({ message: 'Produit mis à jour.', type: 'success' });
+    setToast({ message: t('common.success'), type: 'success' });
   }
 
   async function handleDelete() {
     if (!id) return;
-    if (!confirm('Supprimer ce produit ? Cette action est définitive.')) return;
+    if (!confirm(t('modals.deleteConfirm'))) return;
     setDeleting(true);
     const { error: deleteError } = await deleteProduct(id);
     setDeleting(false);
@@ -121,7 +123,7 @@ export default function ProductDetails() {
               <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
             </div>
           )}
-          Chargement…
+          {t('common.loading')}
         </main>
       </div>
     );
@@ -137,7 +139,7 @@ export default function ProductDetails() {
               <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
             </div>
           )}
-          Erreur : {error}
+          {t('common.error')} : {error}
         </main>
       </div>
     );
@@ -171,7 +173,7 @@ export default function ProductDetails() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
-              Revenir en arrière
+              {t('common.back')}
             </button>
             <h1 className="text-2xl font-bold">{product.name}</h1>
             <p className="text-gray-700">
@@ -252,14 +254,14 @@ export default function ProductDetails() {
               onClick={handleUpdate}
               disabled={saving}
             >
-              {saving ? 'Enregistrement…' : 'Enregistrer'}
+              {saving ? t('common.loading') : t('common.save')}
             </button>
             <button
               className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
               onClick={handleDelete}
               disabled={deleting}
             >
-              {deleting ? 'Suppression…' : 'Supprimer le produit'}
+              {deleting ? t('common.loading') : t('products.editProduct')}
             </button>
           </div>
         </div>

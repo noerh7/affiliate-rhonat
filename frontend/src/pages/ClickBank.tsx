@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ============================================================================
 // TYPES ET INTERFACES
@@ -175,6 +176,7 @@ function getDefaultDateRange(days = 7) {
 // ============================================================================
 
 export default function Clickbank() {
+  const { t } = useTranslation();
   const defaultRange = getDefaultDateRange();
   // API Key gérée en interne
   const developerKey = 'API-KM27URMQL9C2275OIUEIX7FBMX4NHIM6VCHT';
@@ -278,7 +280,7 @@ export default function Clickbank() {
             disabled={loadingClicks || !developerKey}
             className="btn-primary text-sm"
           >
-            {loadingClicks ? 'Chargement...' : 'Récupérer les clics'}
+            {loadingClicks ? t('common.loading') : t('clickbank.clickStats')}
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

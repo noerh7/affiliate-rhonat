@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { getAffiliateLinkDetail } from '../api/links';
+import { useTranslation } from 'react-i18next';
 
 const BASE_GO_URL =
   import.meta.env.VITE_BASE_GO_URL?.replace(/\/$/, '') ?? 'https://affiliate-rhonat-3c2b.vercel.app/go';
 
 export default function LinkDetails() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [link, setLink] = useState<any>(null);
@@ -33,7 +35,7 @@ export default function LinkDetails() {
     return (
       <div className="flex">
         <Sidebar />
-        <main className="p-6 w-full">Chargement…</main>
+        <main className="p-6 w-full">{t('common.loading')}</main>
       </div>
     );
   }
@@ -43,12 +45,12 @@ export default function LinkDetails() {
       <div className="flex">
         <Sidebar />
         <main className="p-6 w-full space-y-3">
-          <div className="text-red-600">Erreur : {error ?? 'Lien introuvable'}</div>
+          <div className="text-red-600">{t('common.error')} : {error ?? t('links.noLinks')}</div>
           <button
             className="text-blue-600 underline underline-offset-2"
             onClick={() => navigate('/links')}
           >
-            Retour aux liens
+            {t('common.back')}
           </button>
         </main>
       </div>
@@ -68,11 +70,11 @@ export default function LinkDetails() {
           className="text-blue-600 underline underline-offset-2 text-sm"
           onClick={() => navigate(-1)}
         >
-          ← Retour
+          ← {t('common.back')}
         </button>
 
         <div className="bg-white rounded shadow p-4 space-y-2">
-          <p className="text-xs text-gray-500">Lien d’affiliation</p>
+          <p className="text-xs text-gray-500">{t('links.linkDetails')}</p>
           <h1 className="text-2xl font-bold break-all">{goUrl}</h1>
           <p className="text-sm text-gray-500">Code : {link.code}</p>
           <p className="text-sm text-gray-500">
@@ -82,7 +84,7 @@ export default function LinkDetails() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded shadow p-4 space-y-2">
-            <p className="text-xs text-gray-500">Produit</p>
+            <p className="text-xs text-gray-500">{t('links.product')}</p>
             <h2 className="text-lg font-semibold">{product?.name ?? 'Produit'}</h2>
             <p className="text-sm text-gray-600">{product?.price}€ — {product?.commission_percent}%</p>
             {product?.landing_url && (
@@ -98,7 +100,7 @@ export default function LinkDetails() {
           </div>
 
           <div className="bg-white rounded shadow p-4 space-y-2">
-            <p className="text-xs text-gray-500">Marque</p>
+            <p className="text-xs text-gray-500">{t('nav.brand')}</p>
             <h2 className="text-lg font-semibold">{brand?.name ?? 'Marque'}</h2>
             {brand?.domain && (
               <a

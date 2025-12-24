@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { getPayoutMethods, requestPayout, getPayoutHistory, exportPayoutsCSV } from '../api/payouts';
 import Sidebar from '../components/Sidebar';
 import PayoutRow from '../components/payouts/PayoutRow';
+import { useTranslation } from 'react-i18next';
 
 export default function Payouts() {
+  const { t } = useTranslation();
   const [methods, setMethods] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [amount, setAmount] = useState('');
@@ -28,7 +30,7 @@ export default function Payouts() {
     <div className="flex">
       <Sidebar />
       <main className="p-6 w-full">
-        <h1 className="text-2xl font-bold mb-4">Paiement Affiliés</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('payouts.title')}</h1>
         <div className="bg-white p-4 shadow rounded mb-6">
           <h2 className="font-semibold text-lg mb-2">Demander un paiement</h2>
           <input
@@ -39,7 +41,7 @@ export default function Payouts() {
             type="number"
           />
           <button className="bg-blue-600 text-white p-2" onClick={pay}>
-            Demander
+            {t('payouts.requestPayout')}
           </button>
         </div>
         <div className="flex justify-between items-center mb-2">

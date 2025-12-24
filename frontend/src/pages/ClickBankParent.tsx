@@ -3,8 +3,10 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import ClickBankAnalytics from './ClickBank';
 import ClickBankVente from './ClickBankVente';
+import { useTranslation } from 'react-i18next';
 
 export default function ClickBankParent() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'analytics' | 'ventes'>('analytics');
 
     return (
@@ -19,7 +21,7 @@ export default function ClickBankParent() {
                             <p className="text-sm text-gray-500 font-medium">Connecteur partenaires</p>
                             <h1 className="text-2xl font-bold">ClickBank</h1>
                         </div>
-                        <span className="badge-soft">Nouveau</span>
+                        <span className="badge-soft">{t('common.new')}</span>
                     </div>
 
                     {/* Onglets */}
@@ -47,7 +49,7 @@ export default function ClickBankParent() {
                                     }
                 `}
                             >
-                                💰 Ventes & Commissions
+                                💰 {t('clickbank.sales')}
                             </button>
                         </nav>
                     </div>

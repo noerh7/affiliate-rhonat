@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../api/supabase';
 import Sidebar from '../components/Sidebar';
 import { TrendingUp, DollarSign, ShoppingCart, Copy, Check, Code } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Conversion {
     id: string;
@@ -26,6 +27,7 @@ interface ConversionStats {
 }
 
 export default function Conversions() {
+    const { t } = useTranslation();
     const [conversions, setConversions] = useState<Conversion[]>([]);
     const [stats, setStats] = useState<ConversionStats>({
         totalConversions: 0,
@@ -232,7 +234,7 @@ export default function Conversions() {
                 {/* En-tête */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Conversions & Ventes
+                        {t('conversions.title')}
                     </h1>
                     <p className="text-gray-600">
                         Suivez vos ventes et générez des pixels de conversion pour vos pages de remerciement
@@ -417,7 +419,7 @@ export default function Conversions() {
                     </div>
 
                     {loading ? (
-                        <div className="p-8 text-center text-gray-500">Chargement...</div>
+                        <div className="p-8 text-center text-gray-500">{t('common.loading')}</div>
                     ) : conversions.length === 0 ? (
                         <div className="p-8 text-center text-gray-500">
                             Aucune conversion enregistrée pour le moment

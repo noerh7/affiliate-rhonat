@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { getAdminAggregates, AdminAggregates } from '../api/admin';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminReports() {
+  const { t } = useTranslation();
   const [data, setData] = useState<AdminAggregates | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,8 +31,8 @@ export default function AdminReports() {
           </p>
         </header>
 
-        {loading && <div className="rounded-xl bg-white shadow p-4 text-sm text-slate-600">Chargement...</div>}
-        {error && <div className="rounded-xl bg-red-50 text-red-700 border border-red-100 p-4">Erreur : {error}</div>}
+        {loading && <div className="rounded-xl bg-white shadow p-4 text-sm text-slate-600">{t('common.loading')}</div>}
+        {error && <div className="rounded-xl bg-red-50 text-red-700 border border-red-100 p-4">{t('common.error')} : {error}</div>}
         {data && (
           <div className="flex flex-col gap-6">
             <Section

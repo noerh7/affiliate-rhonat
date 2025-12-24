@@ -9,12 +9,14 @@ import { getProducts } from '../api/products';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../api/supabase';
+import { useTranslation } from 'react-i18next';
 
 const BASE_GO_URL =
   import.meta.env.VITE_BASE_GO_URL?.replace(/\/$/, '') ??
   'https://affiliate-rhonat-3c2b.vercel.app/go';
 
 export default function Links() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [links, setLinks] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -50,7 +52,7 @@ export default function Links() {
 
   async function handleCreate() {
     if (!selectedProduct) {
-      alert('Choisissez un produit');
+      alert(t('products.selectProduct'));
       return;
     }
     setLoading(true);
@@ -63,7 +65,7 @@ export default function Links() {
       setCustomCode('');
       getAffiliateLinks().then(({ data }) => setLinks(data ?? []));
     } catch (e: any) {
-      alert(e?.message ?? 'Erreur lors de la création du lien');
+      alert(e?.message ?? t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -89,11 +91,11 @@ export default function Links() {
     <div className="flex">
       <Sidebar />
       <div className="p-6 w-full flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">Mes liens affiliés</h1>
+        <h1 className="text-2xl font-bold">{t('links.title')}</h1>
 
         <div className="bg-white shadow rounded p-4 flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Créer un lien traçable</h2>
-          <label className="text-sm font-medium">Produit</label>
+          <h2 className="text-lg font-semibold">{t('links.createLink')}</h2>
+          <label className="text-sm font-medium">{t('links.product')}</label>
           <select
             className="border p-2 rounded"
             value={selectedProduct}
@@ -106,7 +108,7 @@ export default function Links() {
             ))}
           </select>
 
-          <label className="text-sm font-medium">Code personnalisé (optionnel)</label>
+          <label className="text-sm font-medium">{t('forms.optional')}</label>
           <input
             className="border p-2 rounded"
             placeholder="Ex: INSTA-ABC123"
@@ -119,18 +121,18 @@ export default function Links() {
             onClick={handleCreate}
             disabled={loading}
           >
-            {loading ? 'Création…' : 'Créer le lien'}
+            {loading ? t('common.loading') : t('links.createLink')}
           </button>
 
           <p className="text-sm text-gray-600">
-            Chaque lien est unique par affilié et traque automatiquement clics et ventes via Supabase (Edge functions déjà fournies).
+            {t('links.createFirstLink')}
           </p>
         </div>
 
         <div className="flex flex-col gap-2">
           {links.length === 0 && (
             <div className="p-4 bg-white rounded shadow text-gray-600">
-              Aucun lien pour le moment. Crée ton premier lien ci-dessus pour suivre clics et ventes.
+              {t('links.noLinks')}
             </div>
           )}
           {links.map((l) => {
@@ -151,7 +153,7 @@ export default function Links() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Lien : {BASE_GO_URL}/{l.code}
+                      {t('links.linkUrl')} : {BASE_GO_URL}/{l.code}
                     </a>
                     <div className="text-xs text-gray-500">
                       Code : {l.code} — Produit #{l.product_id}
@@ -228,6 +230,8 @@ function ConfirmDeleteModal({
   onConfirm,
   loading
 }: ConfirmDeleteModalProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
@@ -239,13 +243,13 @@ function ConfirmDeleteModal({
             </div>
             <div className="flex-1">
               <p className="text-xs uppercase tracking-wide text-gray-500">
-                Suppression du lien
+                {t('links.deleteLink')}
               </p>
               <p className="text-lg font-semibold text-gray-900">
-                Supprimer ce lien affilié ?
+                {t('modals.deleteConfirm')}
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Cette action enlèvera le lien de ta liste mais ne supprimera pas l'historique de clics/ventes associés.
+                {t('modals.cannotUndo')}
               </p>
             </div>
           </div>
@@ -265,7 +269,7 @@ function ConfirmDeleteModal({
               className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition"
               type="button"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <button
               onClick={onConfirm}
@@ -273,7 +277,7 @@ function ConfirmDeleteModal({
               className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm transition"
               type="button"
             >
-              {loading ? 'Suppression...' : 'Supprimer le lien'}
+              {loading ? t('common.loading') : t('links.deleteLink')}
             </button>
           </div>
         </div>
