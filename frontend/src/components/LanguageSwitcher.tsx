@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
+import FR from 'country-flag-icons/react/3x2/FR';
+import GB from 'country-flag-icons/react/3x2/GB';
 
 const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' }
+    { code: 'fr', name: 'Français', FlagComponent: FR },
+    { code: 'en', name: 'English', FlagComponent: GB }
 ];
 
 export default function LanguageSwitcher() {
@@ -38,7 +40,7 @@ export default function LanguageSwitcher() {
                 aria-label="Change language"
             >
                 <Globe className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                <span className="text-lg">{currentLanguage.flag}</span>
+                <currentLanguage.FlagComponent className="w-5 h-4 rounded-sm shadow-sm" />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {currentLanguage.code.toUpperCase()}
                 </span>
@@ -51,11 +53,11 @@ export default function LanguageSwitcher() {
                             key={lang.code}
                             onClick={() => changeLanguage(lang.code)}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${currentLanguage.code === lang.code
-                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                                    : 'text-gray-700 dark:text-gray-300'
+                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                : 'text-gray-700 dark:text-gray-300'
                                 }`}
                         >
-                            <span className="text-lg">{lang.flag}</span>
+                            <lang.FlagComponent className="w-6 h-4 rounded-sm shadow-sm" />
                             <span className="font-medium">{lang.name}</span>
                             {currentLanguage.code === lang.code && (
                                 <span className="ml-auto text-blue-600 dark:text-blue-400">✓</span>
